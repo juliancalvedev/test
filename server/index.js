@@ -37,6 +37,9 @@ const server = app.listen(port, () => {
 
 // Connect to MongoDB
 const DATABASE_URL = process.env.DB_URL || 'mongodb://127.0.0.1:27017'
+
+// Use this when running with docker-compose
+//const DATABASE_URL = process.env.DB_URL || 'mongodb://admin:admin123@localhost:27017/miBaseDeDatos?authSource=admin'
 const DATABASE = process.env.DB || 'Prolink'
 
 db(DATABASE_URL, DATABASE);

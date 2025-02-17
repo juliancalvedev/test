@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { DeleteIcon, ViewIcon } from '@chakra-ui/icons';
 import { Button, Menu, MenuButton, MenuItem, MenuList, Text, useDisclosure } from '@chakra-ui/react';
-import { getApi } from 'services/api';
 import { HasAccess } from '../../../redux/accessUtils';
 import CommonCheckTable from '../../../components/reactTable/checktable';
 import { SearchIcon } from "@chakra-ui/icons";
@@ -77,16 +76,21 @@ const Index = () => {
 
     ];
 
-    const fetchData = async () => {
-        setIsLoding(true)
-        const result = await dispatch(fetchMeetingData())
-        if (result.payload.status === 200) {
-            setData(result?.payload?.data);
-        } else {
-            toast.error("Failed to fetch data", "error");
+    const fetchData = useCallback(async () => {
+        setIsLoding(true);
+        try {
+            const result = await dispatch(fetchMeetingData());
+            if (result.payload?.status === 200) {
+                setData(Array.isArray(result.payload?.data) ? result.payload.data : []);
+            } else {
+                toast.error("Failed to fetch data", "error");
+            }
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        } finally {
+            setIsLoding(false);
         }
-        setIsLoding(false)
-    }
+    }, [dispatch]);
 
     const handleDeleteMeeting = async (ids) => {
         try {
@@ -105,13 +109,13 @@ const Index = () => {
         }
     }
 
-    // const [selectedColumns, setSelectedColumns] = useState([...tableColumns]);
-    // const dataColumn = tableColumns?.filter(item => selectedColumns?.find(colum => colum?.Header === item.Header))
+    const [selectedColumns, setSelectedColumns] = useState([...tableColumns]);
+    const dataColumn = tableColumns?.filter(item => selectedColumns?.find(colum => colum?.Header === item.Header))
 
 
     useEffect(() => {
         fetchData();
-    }, [action])
+    }, [fetchData, deleteMany]);
 
     return (
         <div>
@@ -119,7 +123,7 @@ const Index = () => {
                 title={title}
                 isLoding={isLoding}
                 columnData={tableColumns ?? []}
-                // dataColumn={dataColumn ?? []}
+                dataColumn={dataColumn ?? []}
                 allData={data ?? []}
                 tableData={data}
                 searchDisplay={displaySearchData}
@@ -128,12 +132,12 @@ const Index = () => {
                 setSearchedDataOut={setSearchedData}
                 tableCustomFields={[]}
                 access={permission}
-                // action={action}
-                // setAction={setAction}
-                // selectedColumns={selectedColumns}
-                // setSelectedColumns={setSelectedColumns}
-                // isOpen={isOpen}
-                // onClose={onClose}
+                action={action}
+                setAction={setAction}
+                selectedColumns={selectedColumns}
+                setSelectedColumns={setSelectedColumns}
+                isOpen={isOpen}
+                onClose={onClose}
                 onOpen={onOpen}
                 selectedValues={selectedValues}
                 setSelectedValues={setSelectedValues}
@@ -158,7 +162,7 @@ const Index = () => {
                 setGetTagValues={setGetTagValuesOutside}
                 setSearchbox={setSearchboxOutside}
             />
-            <AddMeeting setAction={setAction} isOpen={isOpen} onClose={onClose} />
+            <AddMeeting fetchData={fetchData} setAction={setAction} isOpen={isOpen} onClose={onClose} />
 
             {/* Delete model */}
             <CommonDeleteModel isOpen={deleteMany} onClose={() => setDeleteMany(false)} type='Meetings' handleDeleteData={handleDeleteMeeting} ids={selectedValues} />

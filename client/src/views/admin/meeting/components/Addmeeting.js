@@ -42,19 +42,35 @@ const AddMeeting = (props) => {
     const formik = useFormik({
         initialValues: initialValues,
         validationSchema: MeetingSchema,
-        onSubmit: (values, { resetForm }) => {
-            
+        onSubmit: async (values, { resetForm }) => {
+            AddData(values, resetForm);
         },
     });
     const { errors, touched, values, handleBlur, handleChange, handleSubmit, setFieldValue } = formik
 
-    const AddData = async () => {
+    const AddData = async (values, resetForm) => {
+        setIsLoding(true);
+        try {
+            const response = await postApi('api/meeting/add', values);
+
+            if (response.status === 200) {
+                toast.success("Meeting added successfully!");
+                resetForm();
+                onClose();
+
+                if (setAction) setAction(prev => !prev);
+                if (fetchData) await fetchData();
+            } else {
+                toast.error("Failed to add meeting!");
+            }
+        } catch (error) {
+            console.error("Error adding meeting:", error);
+            toast.error("Something went wrong!");
+        } finally {
+            setIsLoding(false);
+        }
 
     };
-
-    const fetchAllData = async () => {
-        
-    }
 
     useEffect(() => {
 
@@ -188,7 +204,7 @@ const AddMeeting = (props) => {
 
                 </ModalBody>
                 <ModalFooter>
-                    <Button size="sm" variant='brand' me={2} disabled={isLoding ? true : false} onClick={handleSubmit}>{isLoding ? <Spinner /> : 'Save'}</Button>
+                    <Button size="sm" variant='brand' me={2} disabled={isLoding ? true : false} onClick={formik.handleSubmit}>{isLoding ? <Spinner /> : 'Save'}</Button>
                     <Button sx={{
                         textTransform: "capitalize",
                     }} variant="outline"

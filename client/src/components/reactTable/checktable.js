@@ -23,7 +23,7 @@ const CommonCheckTable = (props) => {
         title,
         columnData,
         size,
-        // dataColumn,
+        dataColumn,
         setSearchedDataOut,
         state,
         allData,
@@ -31,8 +31,8 @@ const CommonCheckTable = (props) => {
         deleteMany,
         tableCustomFields,
         access,
-        // selectedColumns,
-        // setSelectedColumns,
+        selectedColumns,
+        setSelectedColumns,
         onOpen,
         setDelete,
         selectedValues,
@@ -78,7 +78,7 @@ const CommonCheckTable = (props) => {
     const tableInstance = useTable(
         {
             columns,
-            data,
+            data: Array.isArray(data) ? data : [],
             initialState: { pageIndex: 0 }
         },
         useGlobalFilter,

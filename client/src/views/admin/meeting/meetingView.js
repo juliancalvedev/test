@@ -12,7 +12,7 @@ import { HasAccess } from "../../../redux/accessUtils";
 
 const MeetingView = (props) => {
     const { onClose, isOpen, info, fetchData, setAction, action, access } = props
-    const [data, setData] = useState();
+    const [data, setData] = useState([]);
     const [edit, setEdit] = useState(false);
     const [deleteModel, setDelete] = useState(false);
     const user = JSON.parse(localStorage.getItem("user"))
